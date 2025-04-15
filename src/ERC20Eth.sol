@@ -50,7 +50,6 @@ contract ERC20ETH is IERC20 {
 
     /// @notice This function is intentionally disabled to prevent double-entrypoint balance check bugs.
     /// Users should check ETH balances directly instead of through this contract.
-    /// @param _ The address to check balance for (unused)
     /// @return Never returns, always reverts
     function balanceOf(address) public pure override returns (uint256) {
         // capturing account balances via the token is not supported

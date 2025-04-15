@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-
 # ERC20 ETH
 
 A Solidity implementation of an ERC20 wrapper for native ETH that leverages [ERC-7914](https://github.com/ethereum/ERCs/pull/987) for smart wallet compatibility.
