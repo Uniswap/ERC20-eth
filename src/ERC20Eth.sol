@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import {IERC20} from "forge-std/interfaces/IERC20.sol";
+import {ERC20} from "solady/tokens/ERC20.sol";
 import {IERC7914} from "./interfaces/IERC7914.sol";
 
 /// @title ERC20ETH
@@ -11,11 +11,9 @@ import {IERC7914} from "./interfaces/IERC7914.sol";
 /// while using ERC-7914's transferFromNative hook to move ETH from smart wallets.
 ///
 /// Key features:
-/// - Implements IERC20 interface for ETH
 /// - Uses ERC-7914 for native ETH transfers from smart wallets
-/// - Maintains allowances for transferFrom operations
 /// - Does not track balances internally (relies on native ETH balances)
-contract ERC20ETH is IERC20 {
+contract ERC20ETH is ERC20 {
     /// @notice Thrown when balanceOf is called, as this contract doesn't track balances internally
     /// to prevent double-entrypoint balance check bugs.
     error BalanceOfNotSupported();
@@ -26,26 +24,19 @@ contract ERC20ETH is IERC20 {
     /// @notice Thrown when an ETH transfer fails.
     error TransferFailed();
 
-    /// @notice Total supply is always 0 as this contract doesn't mint tokens.
-    /// It wraps existing ETH.
-    uint256 public constant override totalSupply = 0;
+    /// @dev Returns the name of the token.
+    function name() public pure override returns (string memory) {
+        return "ERC20 ETH";
+    }
 
-    /// @notice Decimals is 18, matching ETH's native decimals.
-    uint8 public constant override decimals = 18;
+    /// @dev Returns the symbol of the token.
+    function symbol() public pure override returns (string memory) {
+        return "ETH";
+    }
+    /// @dev Returns the amount of tokens in existence.
 
-    /// @notice Token name.
-    string public override name;
-
-    /// @notice Token symbol.
-    string public override symbol;
-
-    /// @notice Mapping of owner address to spender address to allowance amount.
-    mapping(address => mapping(address => uint256)) public allowance;
-
-    /// @notice Constructor sets the name and symbol for the token.
-    constructor() {
-        name = "ERC20 ETH";
-        symbol = "ETH";
+    function totalSupply() public pure override returns (uint256 result) {
+        return 0;
     }
 
     /// @notice This function is intentionally disabled to prevent double-entrypoint balance check bugs.
@@ -57,18 +48,6 @@ contract ERC20ETH is IERC20 {
         revert BalanceOfNotSupported();
     }
 
-    /// @notice Sets `amount` as the allowance of `spender` over the caller's tokens.
-    /// @param spender The address which will spend the funds
-    /// @param amount The amount of tokens to be spent
-    /// @return Always returns true
-    function approve(address spender, uint256 amount) public override returns (bool) {
-        allowance[msg.sender][spender] = amount;
-
-        emit Approval(msg.sender, spender, amount);
-
-        return true;
-    }
-
     /// @notice Transfers ETH from the caller to `recipient`.
     /// Uses ERC-7914's transferFromNative to move ETH from the caller to this contract,
     /// then forwards it to the recipient.
@@ -77,7 +56,8 @@ contract ERC20ETH is IERC20 {
     /// @param amount The amount of ETH to transfer
     /// @return Always returns true if the transfer succeeds
     function transfer(address recipient, uint256 amount) public override returns (bool) {
-        return _transfer(msg.sender, recipient, amount);
+        _transfer(msg.sender, recipient, amount);
+        return true;
     }
 
     /// @notice Transfers ETH from `from` to `recipient` using the caller's allowance.
@@ -89,20 +69,17 @@ contract ERC20ETH is IERC20 {
     /// @param amount The amount of ETH to transfer
     /// @return Always returns true if the transfer succeeds
     function transferFrom(address from, address recipient, uint256 amount) public override returns (bool) {
-        uint256 allowed = allowance[from][msg.sender]; // Saves gas for limited approvals.
+        _spendAllowance(from, msg.sender, amount);
 
-        // Decrease allowance if not infinite approval
-        if (allowed != type(uint256).max) allowance[from][msg.sender] = allowed - amount;
-
-        return _transfer(from, recipient, amount);
+        _transfer(from, recipient, amount);
+        return true;
     }
 
     /// @notice Internal helper function to handle the common transfer logic
     /// @param from The address sending the ETH
     /// @param recipient The address receiving the ETH
     /// @param amount The amount of ETH to transfer
-    /// @return Always returns true if the transfer succeeds
-    function _transfer(address from, address recipient, uint256 amount) internal returns (bool) {
+    function _transfer(address from, address recipient, uint256 amount) internal override {
         // Call transferFromNative on the source to move ETH to this contract
         IERC7914(from).transferFromNative(from, address(this), amount);
         // Verify the ETH was actually received
@@ -113,6 +90,10 @@ contract ERC20ETH is IERC20 {
         if (!success) revert TransferFailed();
 
         emit Transfer(from, recipient, amount);
+    }
+
+    /// @notice Sets Permit2 contract's allowance at infinity.
+    function _givePermit2InfiniteAllowance() internal view virtual override returns (bool) {
         return true;
     }
 
