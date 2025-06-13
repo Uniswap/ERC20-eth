@@ -9,7 +9,9 @@ import {IERC7914} from "../src/interfaces/IERC7914.sol";
 // Mock contract implementing IERC7914 for testing
 contract MockERC7914 is IERC7914 {
     bool forceFailure = false;
+
     error AllowanceExceeded();
+
     mapping(address spender => uint256 allowance) public nativeAllowance;
 
     function setForceFailure(bool _forceFailure) external {
@@ -73,17 +75,17 @@ contract ERC20ETHTest is Test {
     function testTransferSuccess() public {
         // Give mockERC7914 some ETH
         vm.deal(address(mockERC7914), 10 ether);
-        
+
         // Use prank to simulate msg.sender as mockERC7914
         vm.startPrank(address(mockERC7914));
-        
+
         // Call transfer to bob
         vm.expectEmit(true, true, false, true);
         emit Transfer(address(mockERC7914), bob, 1 ether);
         bool result = token.transfer(bob, 1 ether);
         assertTrue(result, "Transfer should succeed");
         vm.stopPrank();
-        
+
         // Check bob received ETH
         assertEq(bob.balance, 1 ether, "Bob should receive 1 ether");
         vm.snapshotGasLastCall("transfer_success");
@@ -92,17 +94,17 @@ contract ERC20ETHTest is Test {
     function testTransferFromSuccess() public {
         // Give mockERC7914 some ETH
         vm.deal(address(mockERC7914), 10 ether);
-        
+
         // Approve the test contract to spend on behalf of mockERC7914
         vm.prank(address(mockERC7914));
         token.approve(address(this), 2 ether);
-        
+
         // Call transferFrom as the test contract, from mockERC7914 to bob
         vm.expectEmit(true, true, false, true);
         emit Transfer(address(mockERC7914), bob, 2 ether);
         bool result = token.transferFrom(address(mockERC7914), bob, 2 ether);
         assertTrue(result, "TransferFrom should succeed");
-        
+
         // Check bob received ETH
         assertEq(bob.balance, 2 ether, "Bob should receive 2 ether");
         vm.snapshotGasLastCall("transfer_from_success");
@@ -111,11 +113,11 @@ contract ERC20ETHTest is Test {
     function testTransferFromCannotExceedAllowance() public {
         // Give mockERC7914 some ETH
         vm.deal(address(mockERC7914), 10 ether);
-        
+
         // Approve the test contract to spend on behalf of mockERC7914
         vm.prank(address(mockERC7914));
         token.approve(address(this), 1 ether);
-        
+
         // Call transferFrom as the test contract, from mockERC7914 to bob
         vm.expectRevert(bytes4(keccak256("InsufficientAllowance()")));
         token.transferFrom(address(mockERC7914), bob, 2 ether);
@@ -125,11 +127,11 @@ contract ERC20ETHTest is Test {
     function testTransferFrom7914TransferFailure() public {
         // Give mockERC7914 some ETH
         vm.deal(address(mockERC7914), 10 ether);
-        
+
         // Approve the test contract to spend on behalf of mockERC7914
         vm.prank(address(mockERC7914));
         token.approve(address(this), 2 ether);
-        
+
         // Set the mockERC7914 to force failure
         mockERC7914.setForceFailure(true);
 
@@ -137,7 +139,7 @@ contract ERC20ETHTest is Test {
         vm.expectRevert(MockERC7914.AllowanceExceeded.selector);
         bool result = token.transferFrom(address(mockERC7914), bob, 2 ether);
         assertFalse(result, "TransferFrom should fail");
-        
+
         // Check bob received no ETH
         assertEq(bob.balance, 0 ether, "Bob should receive no ETH");
         vm.snapshotGasLastCall("transfer_from_7914_transfer_failure");
@@ -146,7 +148,7 @@ contract ERC20ETHTest is Test {
     function testTransferFromWithoutApproval() public {
         // Give mockERC7914 some ETH
         vm.deal(address(mockERC7914), 10 ether);
-        
+
         // Call transferFrom as the test contract (no approval), from
         // mockERC7914 to bob
         vm.expectRevert(bytes4(keccak256("InsufficientAllowance()")));
@@ -177,7 +179,7 @@ contract ERC20ETHTest is Test {
         // Use a contract that will reject ETH
         address rejector = address(new Rejector());
         vm.deal(address(mockERC7914), 1 ether);
-        
+
         vm.startPrank(address(mockERC7914));
         vm.expectRevert(ERC20ETH.TransferFailed.selector);
         token.transfer(rejector, 1 ether);
@@ -189,7 +191,7 @@ contract ERC20ETHTest is Test {
     function testZeroAmountTransfer() public {
         vm.deal(address(mockERC7914), 1 ether);
         vm.startPrank(address(mockERC7914));
-        
+
         // Zero amount transfer should succeed
         bool result = token.transfer(bob, 0);
         assertTrue(result, "Zero amount transfer should succeed");
@@ -200,7 +202,7 @@ contract ERC20ETHTest is Test {
     function testTransferToSelf() public {
         vm.deal(address(mockERC7914), 1 ether);
         vm.startPrank(address(mockERC7914));
-        
+
         // Transfer to self should succeed
         bool result = token.transfer(address(mockERC7914), 1 ether);
         assertTrue(result, "Transfer to self should succeed");
@@ -211,12 +213,12 @@ contract ERC20ETHTest is Test {
     function testMultipleTransfers() public {
         vm.deal(address(mockERC7914), 3 ether);
         vm.startPrank(address(mockERC7914));
-        
+
         // Perform multiple transfers
         assertTrue(token.transfer(bob, 1 ether), "First transfer should succeed");
         assertTrue(token.transfer(charlie, 1 ether), "Second transfer should succeed");
         assertTrue(token.transfer(alice, 1 ether), "Third transfer should succeed");
-        
+
         assertEq(bob.balance, 1 ether, "Bob should receive 1 ether");
         assertEq(charlie.balance, 1 ether, "Charlie should receive 1 ether");
         assertEq(alice.balance, 1 ether, "Alice should receive 1 ether");
@@ -228,9 +230,9 @@ contract ERC20ETHTest is Test {
         // Create a malicious contract that tries to reenter during transfer
         MaliciousContract malicious = new MaliciousContract(address(token), address(mockERC7914));
         vm.deal(address(mockERC7914), 2 ether);
-        
+
         vm.startPrank(address(mockERC7914));
-        // The transfer should fail since the malicious contract will try to 
+        // The transfer should fail since the malicious contract will try to
         // transfer more tokens to itself through reentrancy
         vm.expectRevert(ERC20ETH.TransferFailed.selector);
         bool result = token.transfer(address(malicious), 1 ether);
@@ -241,7 +243,7 @@ contract ERC20ETHTest is Test {
     function testETHBalanceManipulation() public {
         vm.deal(address(mockERC7914), 1 ether);
         vm.startPrank(address(mockERC7914));
-        
+
         // Try to transfer more than the contract has
         vm.expectRevert(ERC20ETH.InsufficientTransferAmount.selector);
         token.transfer(bob, 2 ether);
@@ -250,15 +252,15 @@ contract ERC20ETHTest is Test {
 
     function testRevokeAllowance() public {
         vm.deal(address(mockERC7914), 1 ether);
-        
+
         // Approve bob to spend 1 ether
         vm.prank(address(mockERC7914));
         token.approve(bob, 1 ether);
-        
+
         // Revoke allowance by approving zero
         vm.prank(address(mockERC7914));
         token.approve(bob, 0);
-        
+
         // Try to transfer after allowance revoked (should fail)
         vm.prank(bob);
         vm.expectRevert(bytes4(keccak256("InsufficientAllowance()")));
@@ -277,12 +279,12 @@ contract Rejector {
 contract MaliciousContract {
     ERC20ETH public token;
     address public sender;
-    
+
     constructor(address _token, address _sender) {
         token = ERC20ETH(payable(_token));
         sender = _sender;
     }
-    
+
     receive() external payable {
         // Try to reenter and transfer more tokens to self
         token.transferFrom(sender, address(this), 1 ether);
