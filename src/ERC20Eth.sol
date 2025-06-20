@@ -1,5 +1,5 @@
-// SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.13;
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.29;
 
 import {ERC20} from "solady/tokens/ERC20.sol";
 import {IERC7914} from "./interfaces/IERC7914.sol";
@@ -13,6 +13,7 @@ import {IERC7914} from "./interfaces/IERC7914.sol";
 /// Key features:
 /// - Uses ERC-7914 for native ETH transfers from smart wallets
 /// - Does not track balances internally (relies on native ETH balances)
+/// @custom:security-contact security@uniswap.org
 contract ERC20ETH is ERC20 {
     /// @notice Thrown when balanceOf is called, as this contract doesn't track balances internally
     /// to prevent double-entrypoint balance check bugs.
@@ -25,17 +26,20 @@ contract ERC20ETH is ERC20 {
     error TransferFailed();
 
     /// @dev Returns the name of the token.
+    /// @return The name of the token as a string
     function name() public pure override returns (string memory) {
         return "ERC20 ETH";
     }
 
     /// @dev Returns the symbol of the token.
+    /// @return The symbol of the token as a string
     function symbol() public pure override returns (string memory) {
         return "ETH";
     }
-    /// @dev Returns the amount of tokens in existence.
 
-    function totalSupply() public pure override returns (uint256 result) {
+    /// @dev Not applicable to this contract.
+    /// @return Always returns 0 as this contract doesn't track total supply
+    function totalSupply() public pure override returns (uint256) {
         return 0;
     }
 
