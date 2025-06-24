@@ -1,10 +1,10 @@
 {
-  "permit2_infinite_allowance": "73628",
-  "transfer_from_7914_transfer_failure": "3019",
-  "transfer_from_cannot_exceed_allowance": "46535",
-  "transfer_from_success": "73971",
-  "transfer_from_without_approval": "1366568",
+  "permit2_infinite_allowance": "49128",
+  "transfer_from_7914_transfer_failure": "1019",
+  "transfer_from_cannot_exceed_allowance": "24903",
+  "transfer_from_success": "49471",
+  "transfer_from_without_approval": "1180736",
   "transfer_insufficient_amount": "10273",
-  "transfer_success": "70414",
+  "transfer_success": "48782",
   "transfer_to_rejector": "327"
 }
