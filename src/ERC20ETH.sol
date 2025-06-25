@@ -13,6 +13,14 @@ import {IERC7914} from "./interfaces/IERC7914.sol";
 /// Key features:
 /// - Uses ERC-7914 for native ETH transfers from smart wallets
 /// - Does not track balances internally (relies on native ETH balances)
+///
+/// Integration notes:
+/// - Do not send ETH directly to this contract. Only use the transfer() or transferFrom() functions.
+/// - Check ETH balances directly instead of relying upon this contract's balanceOf, totalSupply, or Transfer events.
+/// - Ensure the caller of this contract uses appropriate reentrancy guards.
+/// - When transferring ETH, callback mechanisms (such as receive() or fallback() functions) on the recipient contract may be triggered.
+/// - Relayers should consider gas griefing scenarios, for malicious transferFromNative() calls or ETH transfer callbacks.
+///
 /// @custom:security-contact security@uniswap.org
 contract ERC20ETH is ERC20 {
     /// @notice Thrown when balanceOf is called, as this contract doesn't track balances internally
