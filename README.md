@@ -39,3 +39,24 @@ interface IERC7914 {
 }
 
 ```
+
+## Deployment Addresses
+
+| Network | Address | Commit Hash | Version |
+|---------|---------|------------|---------|
+| Mainnet | 0x00000000e20E49e6dCeE6e8283A0C090578F0fb9 | 455edd8a39d928be8514a8c02e1e4fea4355b404 | v1.0.0 |
+| Unichain | 0x00000000e20E49e6dCeE6e8283A0C090578F0fb9 | 455edd8a39d928be8514a8c02e1e4fea4355b404 | v1.0.0 |
+| Base | 0x00000000e20E49e6dCeE6e8283A0C090578F0fb9 | 455edd8a39d928be8514a8c02e1e4fea4355b404 | v1.0.0 |
+| Optimism | 0x00000000e20E49e6dCeE6e8283A0C090578F0fb9 | 455edd8a39d928be8514a8c02e1e4fea4355b404 | v1.0.0 |
+| Arbitrum | 0x00000000e20E49e6dCeE6e8283A0C090578F0fb9 | 455edd8a39d928be8514a8c02e1e4fea4355b404 | v1.0.0 |
+| Celo | 0x00000000e20E49e6dCeE6e8283A0C090578F0fb9 | 455edd8a39d928be8514a8c02e1e4fea4355b404 | v1.0.0 |
+| BNB | 0x00000000e20E49e6dCeE6e8283A0C090578F0fb9 | 455edd8a39d928be8514a8c02e1e4fea4355b404 | v1.0.0 |
+| Unichain Sepolia | 0x00000000e20E49e6dCeE6e8283A0C090578F0fb9 | 455edd8a39d928be8514a8c02e1e4fea4355b404 | v1.0.0 |
+| Sepolia | 0x00000000e20E49e6dCeE6e8283A0C090578F0fb9 | 455edd8a39d928be8514a8c02e1e4fea4355b404 | v1.0.0 |
+
+
+## Audits
+- [OpenZeppelin Audit 05/2025](audits/OpenZeppelin_audit.pdf)
+
+## License
+MIT
